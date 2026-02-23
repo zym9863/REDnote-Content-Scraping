@@ -1,80 +1,258 @@
-#rednote-scraper-container {
-  position: fixed;
-  bottom: 40px;
-  right: 40px;
-  z-index: 999999;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  padding: 20px;
-  border-radius: 20px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0,0,0,0.02);
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  color: #333;
-  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  min-width: 220px;
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  --rednote-primary: #ff2442;
+  --rednote-primary-hover: #e61e38;
+  --rednote-bg: rgba(255, 255, 255, 0.85);
+  --rednote-bg-hover: rgba(255, 255, 255, 0.95);
+  --rednote-text: #111827;
+  --rednote-text-muted: #6b7280;
+  --rednote-border: rgba(0, 0, 0, 0.08);
+  --rednote-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  --rednote-radius: 24px;
+  --rednote-font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --rednote-font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-#rednote-scraper-container:hover {
-  box-shadow: 0 14px 48px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0,0,0,0.02);
-  transform: translateY(-4px);
-  background: rgba(255, 255, 255, 0.95);
+#rednote-scraper-container {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  z-index: 999999;
+  font-family: var(--rednote-font-body);
+  pointer-events: none; /* Let clicks pass through the container */
+}
+
+#rednote-scraper-container > * {
+  pointer-events: auto; /* Re-enable clicks for children */
+}
+
+.scraper-panel {
+  background: var(--rednote-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--rednote-border);
+  padding: 24px;
+  border-radius: var(--rednote-radius);
+  box-shadow: var(--rednote-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  color: var(--rednote-text);
+  min-width: 280px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative background element */
+.scraper-panel::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 50% 0%, rgba(255, 36, 66, 0.08) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.scraper-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.scraper-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.scraper-icon-wrapper {
+  background: linear-gradient(135deg, var(--rednote-primary) 0%, var(--rednote-primary-hover) 100%);
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(255, 36, 66, 0.3);
 }
 
 .scraper-title {
   margin: 0;
-  font-size: 17px;
+  font-family: var(--rednote-font-display);
+  font-size: 18px;
   font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #111;
+  letter-spacing: -0.02em;
+  color: var(--rednote-text);
 }
 
-.scraper-stats {
+.scraper-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--rednote-text-muted);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  margin: -8px;
+}
+
+.scraper-close-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--rednote-text);
+}
+
+.scraper-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.scraper-stat-card {
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--rednote-text-muted);
+}
+
+.stat-value {
+  font-family: var(--rednote-font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--rednote-text);
+}
+
+.stat-value.user-name {
+  color: var(--rednote-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stat-value.count {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.count-number {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.count-label {
   font-size: 14px;
-  color: #555;
-  margin: 0;
-  line-height: 1.5;
+  font-weight: 500;
+  color: var(--rednote-text-muted);
 }
 
 .scraper-button {
-  background: linear-gradient(135deg, #ff2442 0%, #e61e38 100%);
+  background: var(--rednote-text);
   color: white;
   border: none;
-  padding: 12px 20px;
-  border-radius: 12px;
+  padding: 16px 24px;
+  border-radius: 16px;
+  font-family: var(--rednote-font-display);
   font-size: 15px;
   font-weight: 600;
+  letter-spacing: 0.02em;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  box-shadow: 0 4px 12px rgba(255, 36, 66, 0.3);
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  transition: background-color 0.2s ease;
 }
 
-.scraper-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(255, 36, 66, 0.4);
+.scraper-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--rednote-primary) 0%, var(--rednote-primary-hover) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
 }
 
-.scraper-button:active:not(:disabled) {
-  transform: scale(0.97);
-  box-shadow: 0 2px 8px rgba(255, 36, 66, 0.3);
+.scraper-button:hover:not(:disabled)::before {
+  opacity: 1;
 }
 
 .scraper-button:disabled {
-  background: #ccc;
-  box-shadow: none;
+  background: #e5e7eb;
+  color: #9ca3af;
   cursor: not-allowed;
-  opacity: 0.8;
-  transform: none;
+}
+
+.btn-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.scraper-fab {
+  width: 56px;
+  height: 56px;
+  border-radius: 28px;
+  background: var(--rednote-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--rednote-border);
+  box-shadow: var(--rednote-shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--rednote-primary);
+  cursor: pointer;
+  position: relative;
+  padding: 0;
+}
+
+.fab-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--rednote-primary);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--rednote-font-display);
+  height: 20px;
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .animate-spin {
@@ -82,10 +260,6 @@
 }
 
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
