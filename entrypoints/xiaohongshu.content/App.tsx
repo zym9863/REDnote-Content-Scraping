@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react';
 
+interface ScrapedImage {
+    url: string;
+    title: string;
+}
+
 const App: React.FC = () => {
-    const [images, setImages] = useState<string[]>([]);
+    const [images, setImages] = useState<ScrapedImage[]>([]);
     const [userName, setUserName] = useState<string>('REDnote_User');
     const [isDownloading, setIsDownloading] = useState(false);
 
     // XPath helper
-    const getElementByXPath = (xpath: string): HTMLElement | null => {
+    const getElementByXPath = (xpath: string, contextNode: Node = document): HTMLElement | null => {
         try {
             const result = document.evaluate(
                 xpath,
-                document,
+                contextNode,
                 null,
                 XPathResult.FIRST_ORDERED_NODE_TYPE,
                 null
@@ -21,11 +26,11 @@ const App: React.FC = () => {
         }
     };
 
-    const getElementsByXPath = (xpath: string): HTMLElement[] => {
+    const getElementsByXPath = (xpath: string, contextNode: Node = document): HTMLElement[] => {
         try {
             const result = document.evaluate(
                 xpath,
-                document,
+                contextNode,
                 null,
                 XPathResult.ORDERED_NODE_ITERATOR_TYPE,
                 null
@@ -54,36 +59,59 @@ const App: React.FC = () => {
             }
         }
 
-        // Exact XPath for image provided by user:
-        // /html/body/div[2]/div[1]/div[2]/div[2]/div/div[3]/div/div[1]/div[1]/section[1]/div/a[2]/img
         // We generalize it to all sections
-        const imagesXPath = '/html/body/div[2]/div[1]/div[2]/div[2]/div/div[3]/div/div[1]/div[1]/section/div/a[2]/img';
+        const sectionsXPath = '/html/body/div[2]/div[1]/div[2]/div[2]/div/div[3]/div/div[1]/div[1]/section';
+        const sectionNodes = getElementsByXPath(sectionsXPath);
 
-        let foundImages: string[] = [];
+        let foundImages: ScrapedImage[] = [];
 
-        const imageNodes = getElementsByXPath(imagesXPath);
-        if (imageNodes.length > 0) {
-            foundImages = imageNodes.map(img => {
-                const src = (img as HTMLImageElement).src;
-                // 小红书的封面图可能有不带 protocol 的相对路径或者是不同的分辨率参数, 获取最高清的或者直接用 src
-                // 如果有 style background-image，我们也可以尝试获取但这需要特定的 class
-                return src;
-            }).filter(Boolean);
+        if (sectionNodes.length > 0) {
+            sectionNodes.forEach((section, index) => {
+                // Image XPath relative to section: ./div/a[2]/img or similar
+                const imgNode = getElementByXPath('.//img', section) as HTMLImageElement;
+                // Title XPath relative to section: ./div/div/a/span
+                const titleNode = getElementByXPath('./div/div/a/span', section);
+                
+                if (imgNode && imgNode.src) {
+                    const src = imgNode.src;
+                    let title = titleNode ? titleNode.textContent?.trim() || '' : '';
+                    // Clean title for filename and truncate
+                    title = title.replace(/[\r\n]+/g, ' ').replace(/[\\/:*?"<>|]/g, '_').substring(0, 100);
+                    if (!title) {
+                        title = `cover_${Date.now()}_${index}`;
+                    }
+                    foundImages.push({ url: src, title });
+                }
+            });
         }
 
         // Fallback if the XPath completely fails (e.g. DOM updates)
         if (foundImages.length === 0) {
-            const fallbacks = document.querySelectorAll('section.note-item img');
-            fallbacks.forEach(img => {
-                if ((img as HTMLImageElement).src) {
-                    foundImages.push((img as HTMLImageElement).src);
+            const fallbacks = document.querySelectorAll('section.note-item');
+            fallbacks.forEach((section, index) => {
+                const img = section.querySelector('img');
+                const titleNode = section.querySelector('.title span') || section.querySelector('.title') || section.querySelector('div > div > a > span');
+                if (img && (img as HTMLImageElement).src) {
+                    let title = titleNode ? titleNode.textContent?.trim() || '' : '';
+                    title = title.replace(/[\r\n]+/g, ' ').replace(/[\\/:*?"<>|]/g, '_').substring(0, 100);
+                    if (!title) {
+                        title = `cover_${Date.now()}_${index}`;
+                    }
+                    foundImages.push({ url: (img as HTMLImageElement).src, title });
                 }
             });
         }
 
         // filter duplicates
-        foundImages = Array.from(new Set(foundImages));
-        setImages(foundImages);
+        const uniqueImages: ScrapedImage[] = [];
+        const seenUrls = new Set<string>();
+        for (const img of foundImages) {
+            if (!seenUrls.has(img.url)) {
+                seenUrls.add(img.url);
+                uniqueImages.push(img);
+            }
+        }
+        setImages(uniqueImages);
     };
 
     useEffect(() => {
