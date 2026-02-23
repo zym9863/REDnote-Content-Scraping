@@ -1,3 +1,5 @@
+[English](./README-EN.md) | 中文
+
 # 小红书作品封面提取插件 (REDnote Content Scraping)
 
 这是一个基于 [WXT](https://wxt.dev/) 框架和 React 开发的现代浏览器扩展。
