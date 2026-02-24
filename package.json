@@ -1,6 +1,6 @@
 {
-  "name": "wxt-react-starter",
-  "description": "manifest.json description",
+  "name": "rednote-content-scraping",
+  "description": "小红书内容抓取浏览器扩展 - 抓取并导出小红书作品封面",
   "private": true,
   "version": "0.0.0",
   "type": "module",
